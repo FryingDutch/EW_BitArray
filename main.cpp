@@ -40,7 +40,7 @@ public:
 	void add(bool _boolean)
 	{
 		//bitshift the 3 most significant bits completely to the right and check if their numerical value is lower then 5 (bitcounter)
-		if (bits >> 5 < 5)
+		if (this->counter >> 5 < 5)
 		{
 			// Bitshift one to left to make room at the least significant bit for the new value.
 			// Add 0b0(false) or 0b1(true) at the least significant bit.
