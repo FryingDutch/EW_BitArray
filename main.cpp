@@ -20,13 +20,13 @@ public:
 	// Overload operators to make it possible to compare FiveBooleanBytes with one another without taking the counter (3 most signifcant bits) into factor.
 	bool operator==(const FiveBooleanByte& rhs)
 	{
-		if (this->values & 0b00'01'11'11 == rhs.values & 0b00'01'11'11) return true;
+		if ((this->values & 0b00'01'11'11) == (rhs.values & 0b00'01'11'11)) return true;
 		return false;
 	}
 
 	bool operator!=(const FiveBooleanByte& rhs)
 	{
-		if (this->values & 0b00'01'11'11 != rhs.values & 0b00'01'11'11) return true;
+		if ((this->values & 0b00'01'11'11) != (rhs.values & 0b00'01'11'11)) return true;
 		return false;
 	}
 
@@ -113,5 +113,5 @@ int main(void)
 	if ((bools2.booleans & 0b00'00'01'00) >> 2 == false) std::cout << "This one bit is false\n";
 	if ((bools2.booleans & 0b00'00'00'01) == true) std::cout << "This bit is true\n";
 	*/
-
+	
 }
