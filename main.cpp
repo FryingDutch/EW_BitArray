@@ -1,5 +1,6 @@
-#include <iostream>
-#include <bitset>
+// FiveBooleanByte is library independend
+#include <iostream> // Needed for logging and debugging
+#include <bitset> // Needed to show the byte in a binary representation
 
 struct FiveBooleanByte
 {
@@ -28,6 +29,12 @@ public:
 	{
 		if ((this->values & 0b00'01'11'11) != (rhs.values & 0b00'01'11'11)) return true;
 		return false;
+	}
+
+	// Overload operators to make it possible to copy FiveBooleanBytes into another.
+	void operator=(const FiveBooleanByte& rhs)
+	{
+		this->values = rhs.values;
 	}
 
 public:
@@ -65,11 +72,12 @@ public:
 		this->bits = ((this->booleans & 0b00'01'11'11) >> 1) | (((this->counter >> 5) - 1) << 5);
 
 		std::bitset<8> a(values);
-		std::cout << "After removing the bit: " << a << "\n";
+		std::cout << "After removing the least significant bit: " << a << "\n";
 		std::cout << "Numerical value of counter: " << (int)(this->counter >> 5) << "\n\n";
 	}
-
-	// This function is very generic with every position:
+	
+	// It first checks if the decimal value of the counter (3 most signifcant bits) is higher or equal to the position of the removed bit, to not mess up the state of the counter.
+	// Further on the method itself is very generic with every position:
 	// It first masks the left bits of the bit asked to be removed
 	// Then it bitshifts these one to the right to close the gap of the to be removed bit.
 	// Then it masks the right bits of the to be removed bit.
@@ -79,37 +87,47 @@ public:
 	// Then add the new booleans and the correct counter back together again.
 	// For case 1 we can use the same code as for "removeLeastSignificantBit", as the first bit will also always be the least significant.
 	// However we do not link to the method directly because calling the method for something thats only 1 line of code would be a waste of resources.
-	void removeThisBit(byte _position)
+	void removeBitAtPosition(byte _position)
 	{
-		switch (_position)
+		if (this->counter >> 5 >= _position)
 		{
-		case 1:
-			this->bits = ((this->booleans & 0b00'01'11'11) >> 1) | (((this->counter >> 5) - 1) << 5);
-			break;
+			switch (_position)
+			{
+			case 1:
+				this->bits = ((this->booleans & 0b00'01'11'11) >> 1) | (((this->counter >> 5) - 1) << 5);
+				break;
 
-		case 2:
-			this->bits = (((this->booleans & 0b00'01'11'00) >> 1) | (this->booleans & 0b00'00'00'01)) | (((this->counter >> 5) - 1) << 5);
-			break;
+			case 2:
+				this->bits = (((this->booleans & 0b00'01'11'00) >> 1) | (this->booleans & 0b00'00'00'01)) | (((this->counter >> 5) - 1) << 5);
+				break;
 
-		case 3:
-			this->bits = (((this->booleans & 0b00'01'10'00) >> 1) | (this->booleans & 0b00'00'00'11)) | (((this->counter >> 5) - 1) << 5);
-			break;
+			case 3:
+				this->bits = (((this->booleans & 0b00'01'10'00) >> 1) | (this->booleans & 0b00'00'00'11)) | (((this->counter >> 5) - 1) << 5);
+				break;
 
-		case 4:
-			this->bits = (((this->booleans & 0b00'01'00'00) >> 1) | (this->booleans & 0b00'00'01'11)) | (((this->counter >> 5) - 1) << 5);
-			break;
+			case 4:
+				this->bits = (((this->booleans & 0b00'01'00'00) >> 1) | (this->booleans & 0b00'00'01'11)) | (((this->counter >> 5) - 1) << 5);
+				break;
 
-		case 5:
-			this->bits = this->booleans & 0b00'00'11'11 | (((this->counter >> 5) - 1) << 5);
-			break;
+			case 5:
+				this->bits = this->booleans & 0b00'00'11'11 | (((this->counter >> 5) - 1) << 5);
+				break;
+
+			default:
+				break;
+			}
 		}
+
+		std::bitset<8> a(values);
+		std::cout << "After removing bit at position \"" << (int)_position << "\": " << a << "\n";
+		std::cout << "Numerical value of counter: " << (int)(this->counter >> 5) << "\n\n";
 	}
 
 	// Again very generic in every position:
 	// By first looking at what the counters reads, by bitshifting them 5 to the right, we know its decimal value.
 	// If we know what the counters reads, we know where the most significant bit is (and by most significant, we mean the most significant boolean).
 	// Then we take everything from the right of the most significant bit and mask away the rest of the byte.
-	// Then, if we know what the current counters reads, we also no what its new value should be after decrementing by one.
+	// Then, if we know what the current counters reads, we also know what its new value should be after decrementing by one.
 	// Therefore, we just mask the known constant of the decremented value with the result of the new booleans to add them back together again.
 	void removeMostSignificantBit()
 	{
@@ -138,12 +156,20 @@ public:
 		default:
 			break;
 		}
+
+		std::bitset<8> a(values);
+		std::cout << "After removing the most significant bit: " << a << "\n";
+		std::cout << "Numerical value of counter: " << (int)(this->counter >> 5) << "\n\n";
 	}
 
 	void clear()
 	{
 		// Bitshift 8 to the right to clear the byte.
 		this->bits >>= 8;
+
+		std::bitset<8> a(values);
+		std::cout << "After clearing the byte: " << a << "\n";
+		std::cout << "Numerical value of counter: " << (int)(this->counter >> 5) << "\n\n";
 	}
 };
 
@@ -160,16 +186,22 @@ int main(void)
 	// Will not do anything because the counter is at 5
 	myByte.add(false); // 6
 
-	myByte.removeThisBit(5);
+	myByte.removeBitAtPosition(2);      // 4
+	myByte.removeMostSignificantBit();  // 3
+	myByte.removeLeastSignificantBit(); // 2
 
-	std::bitset<8> z(myByte.values);
-	std::cout << "End: " << z << "\n";
+	// Also possible to use a copy of a boolean instance as an argument.
+	bool foo{ true };
+	myByte.add(foo); // 3
+
+	std::bitset<8> binaryRepresentation(myByte.values), binaryRepresentation2{};
+	std::cout << "End: " << binaryRepresentation << "\n";
 	std::cout << "Numerical value of counter: " << (int)(myByte.counter >> 5) << "\n\n";
-	std::cout << "The size of FIveBooleanByte (without counting its functions): " << sizeof(myByte) << " Byte(s).\n";
+	std::cout << "The size of FIveBooleanByte (without counting its functions): " << sizeof(myByte) << " Byte(s).\n\n";
 
-	//-------------------------------------------------------------------------------------------------------------------
-	// Uncomment for the second part of the showcase.
-	/*
+	// Only for showcasing purposes, this is to pause the system untill there is an input.
+	system("pause");
+	
 	FiveBooleanByte myByte2;
 	
 	// Showing that either 1 ,NULL or 0, is also the same as true or false.
@@ -179,24 +211,26 @@ int main(void)
 	myByte2.add(NULL);  // 4
 	myByte2.add(1);     // 5
 
+	// Equalize a FiveBooleanByte with another.
+	myByte2 = myByte;
+
 	// Only for showcasing purposes, this is to clear the screen of all previous prints.
 	system("CLS");
 
 	// Compare 2nd FiveBooleanByte with the first.
-	if(myByte2 == myByte) std::cout << "First and second FiveBooleanByte are equal.\n";
+	binaryRepresentation = myByte.values;
+	binaryRepresentation2 = myByte2.values;
+	if (myByte2 == myByte) std::cout << "First [\"" << binaryRepresentation << "\"] FiveBooleanByte is equal to second [\"" << binaryRepresentation2 << "\"] FiveBooleanByte.\n\n";
 
 	// Clear bools and compare again.
 	myByte.clear();
-	if(myByte != myByte2) std::cout << "First and second FiveBooleanByte are not equal.\n";
-	*/
+	binaryRepresentation = myByte.values;
+	if(myByte != myByte2) std::cout << "First [\"" << binaryRepresentation << "\"] FiveBooleanByte and second [\"" << binaryRepresentation2 << "\"] FiveBooleanByte are not equal.\n\n";
 
-	//-----------------------------------------------------------------------------------------------------------------
-	// Uncomment for the third part of the showcase.
-	/*
+	system("pause");
 	system("CLS");
 
-	// A way for the user to extract single bits to check their value.
-	if ((myByte2.booleans & 0b00'00'00'10) >> 1 == false) std::cout << "This one bit is false\n";
-	if ((myByte2.booleans & 0b00'00'00'01) == true) std::cout << "This bit is true\n";
-	*/
+	// Ways for the user to extract single bits to check their value.
+	if (!((myByte2.booleans & 0b00'00'00'10) >> 1)) std::cout << binaryRepresentation2 << " - [\"0 0 0 0 0 0 X 0\"] This bit is false.\n";
+	if ((myByte2.booleans & 0b00'00'00'01) == true) std::cout << binaryRepresentation2 << " - [\"0 0 0 0 0 0 0 X\"] This bit is true.\n";
 }
