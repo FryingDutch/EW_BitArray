@@ -21,14 +21,12 @@ public:
 	// Overload operators to make it possible to compare FiveBooleanBytes with one another without taking the counter (3 most signifcant bits) into factor.
 	bool operator==(const FiveBooleanByte& rhs)
 	{
-		if ((this->values & 0b00'01'11'11) == (rhs.values & 0b00'01'11'11)) return true;
-		return false;
+		return (this->values & 0b00'01'11'11) == (rhs.values & 0b00'01'11'11);		
 	}
 
 	bool operator!=(const FiveBooleanByte& rhs)
 	{
-		if ((this->values & 0b00'01'11'11) != (rhs.values & 0b00'01'11'11)) return true;
-		return false;
+		return (this->values & 0b00'01'11'11) != (rhs.values & 0b00'01'11'11);
 	}
 
 	// Overload operator to make it possible to copy FiveBooleanBytes into another.
@@ -76,6 +74,48 @@ public:
 		std::cout << "After removing the least significant bit: " << a << "\n";
 		std::cout << "Numerical value of counter: " << (int)(this->counter >> 5) << "\n\n";
 	}
+
+	// Again very generic in every position:
+	// By first looking at what the counters reads, by bitshifting them 5 to the right, we know its decimal value.
+	// If we know what the counters reads, we know where the most significant bit is (and by most significant, we mean the most significant boolean).
+	// Then we take everything from the right of the most significant bit and mask away the rest of the byte.
+	// Then, if we know what the current counter reads, we also know what its new value should be after decrementing by one.
+	// Therefore, we just mask the known constant of the decremented value with the result of the new booleans to add them back together again.
+	void removeMostSignificantBit()
+	{
+		switch (this->counter >> 5)
+		{
+		case 1:
+			this->bits >>= 8; // Clear the full byte since minus one will result in NULL.
+			break;
+
+		case 2:
+			this->bits = (this->booleans & 0b00'00'00'01) | 0b00'10'00'00; // If shifted right (>>) 5 this constant will read as 1.
+			break;
+
+		case 3:
+			this->bits = (this->booleans & 0b00'00'00'11) | 0b01'00'00'00; // If shifted right (>>) 5 this constant will read as 2.
+			break;
+
+		case 4:
+			// Showing that a decimal 7 is the same as binary 00'00'01'11, and therefore, only masks the 3 least signifcant bits.
+			// Showing that a hexidecimal 60 is the same as binary 01'10'00'00, therefore, if shifted (>>) 5 this constant will still read as 3.
+			this->bits = (this->booleans & 7) | 0x60;          // If shifted right (>>) 5 this constant will read as 3.
+			break;
+
+		case 5:
+			// Showing that a decimal 128 is the same as binary 10'00'00'00, therefore, if shifted (>>) 5 this constant will still read as 4.
+			this->bits = (this->booleans & 0b00'00'11'11) | 128;           // If shifted right (>>) 5 this constant will read as 4.
+			break;
+
+		default:
+			break;
+		}
+
+		std::bitset<8> a(values);
+		std::cout << "After removing the most significant bit: " << a << "\n";
+		std::cout << "Numerical value of counter: " << (int)(this->counter >> 5) << "\n\n";
+	}
 	
 	// It first checks if the decimal value of the counter (3 most signifcant bits) is higher or equal to the position of the removed bit, to not mess up the state of the counter.
 	// Further on the method itself is very generic with every position:
@@ -121,48 +161,6 @@ public:
 
 		std::bitset<8> a(values);
 		std::cout << "After removing bit at position \"" << (int)_position << "\": " << a << "\n";
-		std::cout << "Numerical value of counter: " << (int)(this->counter >> 5) << "\n\n";
-	}
-
-	// Again very generic in every position:
-	// By first looking at what the counters reads, by bitshifting them 5 to the right, we know its decimal value.
-	// If we know what the counters reads, we know where the most significant bit is (and by most significant, we mean the most significant boolean).
-	// Then we take everything from the right of the most significant bit and mask away the rest of the byte.
-	// Then, if we know what the current counter reads, we also know what its new value should be after decrementing by one.
-	// Therefore, we just mask the known constant of the decremented value with the result of the new booleans to add them back together again.
-	void removeMostSignificantBit()
-	{
-		switch (this->counter >> 5)
-		{
-		case 1:
-			this->bits >>= 8; // Clear the full byte since minus one will result in NULL.
-			break;
-
-		case 2:
-			this->bits = (this->booleans & 0b00'00'00'01) | 0b00'10'00'00; // If shifted right (>>) 5 this constant will read as 1.
-			break;
-
-		case 3:
-			this->bits = (this->booleans & 0b00'00'00'11) | 0b01'00'00'00; // If shifted right (>>) 5 this constant will read as 2.
-			break;
-
-		case 4:
-			// Showing that a decimal 7 is the same as binary 00'00'01'11, and therefore, only masks the 3 least signifcant bits.
-			// Showing that a hexidecimal 60 is the same as binary 01'10'00'00, therefore, if shifted (>>) 5 this constant will still read as 3.
-			this->bits = (this->booleans & 7) | 0x60;          // If shifted right (>>) 5 this constant will read as 3.
-			break;
-
-		case 5:
-			// Showing that a decimal 128 is the same as binary 10'00'00'00, therefore, if shifted (>>) 5 this constant will still read as 4.
-			this->bits = (this->booleans & 0b00'00'11'11) | 128;           // If shifted right (>>) 5 this constant will read as 4.
-			break;
-
-		default:
-			break;
-		}
-
-		std::bitset<8> a(values);
-		std::cout << "After removing the most significant bit: " << a << "\n";
 		std::cout << "Numerical value of counter: " << (int)(this->counter >> 5) << "\n\n";
 	}
 
@@ -217,6 +215,22 @@ public:
 		std::cout << "After clearing the byte: " << a << "\n";
 		std::cout << "Numerical value of counter: " << (int)(this->counter >> 5) << "\n\n";
 	}
+
+	// To get the counters decimal value.
+	int getCounter()
+	{
+		return this->counter >> 5;
+	}
+
+	// If we know the position to get, we can just bitshift its own position minus 1 to get it at the least significant bit.
+	// Then we can simply mask it with a 1 / true / 0b00'00'00'01.
+	// Then return the result.
+	// To not confuse the user, we allow them to also get the counter bits.
+	// So to not get a false negative if they want to check.
+	bool getBit(const byte _position)
+	{
+		return (this->bits >> (_position - 1)) & 1;
+	}
 };
 
 int main(void)
@@ -244,7 +258,7 @@ int main(void)
 
 	std::bitset<8> binaryRepresentation{ myByte.values }, binaryRepresentation2{};
 	std::cout << "End: " << binaryRepresentation << "\n";
-	std::cout << "Numerical value of counter: " << (int)(myByte.counter >> 5) << "\n\n";
+	std::cout << "Numerical value of counter: " << (int)(myByte.getCounter()) << "\n\n";
 	std::cout << "The size of FiveBooleanByte (without counting its functions): " << sizeof(myByte) << " Byte(s).\n\n";
 
 	system("pause"); // Only for showcasing purposes, this is to pause the system untill there is an input.
@@ -279,6 +293,11 @@ int main(void)
 	system("CLS");
 
 	// A way for the user to extract single bits to check their value.
-	if (!((myByte2.booleans & 0b00'00'00'10) >> 1)) std::cout << binaryRepresentation2 << " - [\"0 0 0 0 0 0 X 0\"] This bit is false.\n";
-	if ((myByte2.booleans & 0b00'00'00'01) == true) std::cout << binaryRepresentation2 << " - [\"0 0 0 0 0 0 0 X\"] This bit is true.\n";
+	if (!myByte2.getBit(2)) std::cout << binaryRepresentation2 << " - [\"0 0 0 0 0 0 X 0\"] This bit is false.\n";
+	if (myByte2.getBit(1) == true) std::cout << binaryRepresentation2 << " - [\"0 0 0 0 0 0 0 X\"] This bit is true.\n";
+
+	for (char i = 0; i < myByte2.getCounter(); i++)
+	{
+		if (myByte2.getBit(i)) std::cout << "This bit is true\n";
+	}
 }
