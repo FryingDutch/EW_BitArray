@@ -102,7 +102,8 @@ public:
 	// Start with an empty byte or an already filled in one. Keep in mind that you'll also have to manually input the counter correctly in that case.
 	EW_BitArray(bytes _bits = 0x00, T _size = 0)
 	{
-		if(_bits)
+		if (_size == 0) _bits = 0x00;
+
 		switch (sizeof(T))
 		{
 		case 1:
