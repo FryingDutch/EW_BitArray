@@ -51,4 +51,10 @@ for(size_t i = 0; i < boolArray.size(); i++)
 ```
 
 ## Known issues and limitations
-- No implementation for a correctness focused backup server yet
+- Not possible to replace an element by using the array indexing:
+```cpp
+for(size_t i = 0; i < boolArray.size(); i++)
+{
+   boolArray[i] = 0;
+}
+```
