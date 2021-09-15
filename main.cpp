@@ -1,9 +1,9 @@
 #include "EW_BitArray.h"
-#include <vector>
+#include <iostream>
 
 int main(void)
 {
-    EW_BitArray<uint16_t> boolArray;
+    EW_BitArray<> boolArray;
 
     boolArray.add(false);
     boolArray.add(true);
@@ -11,7 +11,7 @@ int main(void)
     boolArray.add(true);
     boolArray.add(false);
 
-    std::cout << boolArray.size();
+    std::cout << boolArray.MAX();
 
     EW_BitArray<uint8_t> boolArray2{ 5, 0b11111 };
 } 

@@ -1,9 +1,6 @@
-// FiveBooleanByte is library independend
-#include <iostream> // Needed for logging and debugging
-#include <bitset> // Needed to show the byte in a binary representation
 #include <stdexcept>
 
-template<typename T>
+template<typename T = uint64_t>
 struct EW_BitArray
 {
 	// Typedef the typename to a byte to make its goal more clear and the code still readable.
@@ -152,10 +149,6 @@ public:
 				bits = (((T)((T)booleans << 1) + (T)_boolean) & (T)0x01FFFFFFFFFFFFFF) | (((uint64_t)(counter >> 58) + 1) << 58);
 			break;
 		}
-
-		std::bitset<sizeof(T) * 8> a(values);
-		std::cout << "After adding the value: " << a << "\n";
-		std::cout << "Numerical value of counter: " << size() << "\n\n";
 	}
 
 	// Remove last element
@@ -183,10 +176,6 @@ public:
 				bits = ((booleans & (T)0x01FFFFFFFFFFFFFF) >> 1) | (((uint64_t)(counter >> 58) - 1) << 58);
 			break;
 		}
-
-		std::bitset<sizeof(T) * 8> a(values);
-		std::cout << "After removing the least significant bit: " << a << "\n";
-		std::cout << "Numerical value of counter: " << size() << "\n\n";
 	}
 
 	// Remove first element
@@ -211,10 +200,6 @@ public:
 			bits = (booleans & (T)((T)pow(2, (counter >> 58) - 1) - 1)) | (((uint64_t)(counter >> 58) - 1) << 58);
 			break;
 		}
-
-		std::bitset<sizeof(T) * 8> a(values);
-		std::cout << "After removing the most significant bit: " << a << "\n";
-		std::cout << "Numerical value of counter: " << size() << "\n\n";
 	}
 
 	// Remove element at position
@@ -242,10 +227,6 @@ public:
 				bits = ((((booleans & (((T)0x01FFFFFFFFFFFFFF >> ((counter >> 58) - _position)) << ((counter >> 58) - _position)))) >> 1) | (booleans & (int8_t)(pow(2, (counter >> 58) - (_position + 1)) - 1))) | (((counter >> 58) - 1) << 58);
 			break;
 		}
-
-		std::bitset<sizeof(T) * 8> a(values);
-		std::cout << "After removing bit at position \"" << (int)_position << "\": " << a << "\n";
-		std::cout << "Numerical value of counter: " << size() << "\n\n";
 	}
 
 	// Replace element at position
@@ -273,10 +254,6 @@ public:
 				bits = (bits & (((T)0xFFFFFFFFFFFFFFFF << ((counter >> 58) - _position)) + ((T)pow(2, (counter >> 58) - (_position + 1)) - 1))) | ((T)(_newValue & 1) << ((((counter >> 58) - 1) - _position)));
 			break;
 		}
-
-		std::bitset<sizeof(T) * 8> a(values);
-		std::cout << "After replacing the bit at position \"" << (uint16_t)_position << "\" with the value \"" << (uint16_t)_newValue << "\": " << a << "\n";
-		std::cout << "Numerical value of counter: " << size() << "\n\n";
 	}
 
 	// Clear all data
@@ -303,14 +280,10 @@ public:
 		default:
 			break;
 		}
-
-		std::bitset<sizeof(T) * 8> a(values);
-		std::cout << "After clearing the byte: " << a << "\n";
-		std::cout << "Numerical value of counter: " << size() << "\n\n";
 	}
 
 	// To get the amount of elements
-	uint16_t size() noexcept
+	const uint16_t size() noexcept
 	{
 		switch (sizeof(T))
 		{
