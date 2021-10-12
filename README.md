@@ -58,6 +58,9 @@ for(size_t i = 0; i < boolArray.size(); i++)
 ```cpp
 for(size_t i = 0; i < boolArray.size(); i++)
 {
-   boolArray[i] = 0; // The array indexing uses bitshifting to shift the value to the front and mask it with a 1 to get its value. Therefore using it to replace a value, will not work.
+   boolArray[i] = 0; // The array indexing uses bitshifting to shift the value to the front and mask it with a 1 to get its value. Therefore using it to replace a value, will not work.  
+   
+   // Instead use the replace method();   
+   boolArray.replace(i, 0);
 }
 ```
