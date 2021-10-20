@@ -1,12 +1,12 @@
 # EW_BitArray: A dynamic bit array.
 
-**EW_BitArray** is a C++ datatype that allows the user to _dynamically_ store an array of booleans inside the bytes itself.  
+**EW_BitArray** is a C++ datastructure that allows the user to _dynamically_ store an array of booleans inside the bytes itself.  
 And therefore the user is no longer bound to use a single byte for each boolean.  
   
 It has a build in counter that keeps track of the amount of bits used.  
 It can use a container of **1, 2, 4, or 8 bytes**. In all cases, the _most signifcant bits_ are reserved for the counter.
 
-There is also nu use of local variables, only the necessary function arguments. This is to minimalize memory usage in general.  
+There is also no use of local variables, only the necessary function arguments. This is to minimalize memory usage in general.  
 Also it doesnt use its own methods, even though it would make the code more readable, it takes away from its efficiency.
   
 ## Bits available
